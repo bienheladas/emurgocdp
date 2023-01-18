@@ -44,7 +44,13 @@ library
     exposed-modules:  
       Simple.Simple,
       Simple.SimpleType,
-      Simple.OffChainType
+      Simple.OffChainType,
+      Beneficiary.OnChain,
+      Beneficiary.OffChain,
+      Parameterized.OnChain,
+      Parameterized.OffChain,
+      Minting.MintBurn,
+      Minting.OffChainMintBurn
 
 -- Plutus dependencies
     build-depends:

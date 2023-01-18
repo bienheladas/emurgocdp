@@ -50,15 +50,15 @@
   (major1) == 0 && (major2) <  10 || \
   (major1) == 0 && (major2) == 10 && (minor) <= 12)
 #endif /* MIN_VERSION_bytestring */
-/* package cardano-api-1.35.3 */
+/* package cardano-api-1.35.4 */
 #ifndef VERSION_cardano_api
-#define VERSION_cardano_api "1.35.3"
+#define VERSION_cardano_api "1.35.4"
 #endif /* VERSION_cardano_api */
 #ifndef MIN_VERSION_cardano_api
 #define MIN_VERSION_cardano_api(major1,major2,minor) (\
   (major1) <  1 || \
   (major1) == 1 && (major2) <  35 || \
-  (major1) == 1 && (major2) == 35 && (minor) <= 3)
+  (major1) == 1 && (major2) == 35 && (minor) <= 4)
 #endif /* MIN_VERSION_cardano_api */
 /* package cardano-binary-1.5.0 */
 #ifndef VERSION_cardano_binary
@@ -140,9 +140,9 @@
   (major1) == 1 && (major2) <  0 || \
   (major1) == 1 && (major2) == 0 && (minor) <= 0)
 #endif /* MIN_VERSION_plutus_contract */
-/* package plutus-ledger-1.0.0 */
+/* package plutus-ledger-1.0.0.0 */
 #ifndef VERSION_plutus_ledger
-#define VERSION_plutus_ledger "1.0.0"
+#define VERSION_plutus_ledger "1.0.0.0"
 #endif /* VERSION_plutus_ledger */
 #ifndef MIN_VERSION_plutus_ledger
 #define MIN_VERSION_plutus_ledger(major1,major2,minor) (\
@@ -150,9 +150,9 @@
   (major1) == 1 && (major2) <  0 || \
   (major1) == 1 && (major2) == 0 && (minor) <= 0)
 #endif /* MIN_VERSION_plutus_ledger */
-/* package plutus-ledger-api-1.0.0.0 */
+/* package plutus-ledger-api-1.0.0.1 */
 #ifndef VERSION_plutus_ledger_api
-#define VERSION_plutus_ledger_api "1.0.0.0"
+#define VERSION_plutus_ledger_api "1.0.0.1"
 #endif /* VERSION_plutus_ledger_api */
 #ifndef MIN_VERSION_plutus_ledger_api
 #define MIN_VERSION_plutus_ledger_api(major1,major2,minor) (\
@@ -200,15 +200,15 @@
   (major1) == 1 && (major2) <  0 || \
   (major1) == 1 && (major2) == 0 && (minor) <= 0)
 #endif /* MIN_VERSION_plutus_tx_plugin */
-/* package serialise-0.2.5.0 */
+/* package serialise-0.2.6.0 */
 #ifndef VERSION_serialise
-#define VERSION_serialise "0.2.5.0"
+#define VERSION_serialise "0.2.6.0"
 #endif /* VERSION_serialise */
 #ifndef MIN_VERSION_serialise
 #define MIN_VERSION_serialise(major1,major2,minor) (\
   (major1) <  0 || \
   (major1) == 0 && (major2) <  2 || \
-  (major1) == 0 && (major2) == 2 && (minor) <= 5)
+  (major1) == 0 && (major2) == 2 && (minor) <= 6)
 #endif /* MIN_VERSION_serialise */
 /* package text-1.2.4.1 */
 #ifndef VERSION_text
@@ -221,15 +221,15 @@
   (major1) == 1 && (major2) == 2 && (minor) <= 4)
 #endif /* MIN_VERSION_text */
 
-/* tool doctest-0.20.0 */
+/* tool doctest-0.20.1 */
 #ifndef TOOL_VERSION_doctest
-#define TOOL_VERSION_doctest "0.20.0"
+#define TOOL_VERSION_doctest "0.20.1"
 #endif /* TOOL_VERSION_doctest */
 #ifndef MIN_TOOL_VERSION_doctest
 #define MIN_TOOL_VERSION_doctest(major1,major2,minor) (\
   (major1) <  0 || \
   (major1) == 0 && (major2) <  20 || \
-  (major1) == 0 && (major2) == 20 && (minor) <= 0)
+  (major1) == 0 && (major2) == 20 && (minor) <= 1)
 #endif /* MIN_TOOL_VERSION_doctest */
 /* tool gcc-11.1.0 */
 #ifndef TOOL_VERSION_gcc

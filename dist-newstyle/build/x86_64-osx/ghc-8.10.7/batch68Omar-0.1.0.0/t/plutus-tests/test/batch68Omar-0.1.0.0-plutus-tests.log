@@ -1,8 +1,0 @@
-Test suite plutus-tests: RUNNING...
- casos de uso 
-  descripcion
-    correr la definicion de myTrace: OK (0.73s)
-
-All 1 tests passed (0.73s)
-Test suite plutus-tests: PASS
-Test suite logged to: /Users/omarponce/emurgocdp/dist-newstyle/build/x86_64-osx/ghc-8.10.7/batch68Omar-0.1.0.0/t/plutus-tests/test/batch68Omar-0.1.0.0-plutus-tests.log
