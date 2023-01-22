@@ -26,9 +26,11 @@ import qualified PlutusTx
 import           PlutusTx.Prelude          as Plutus ( Eq(..), (&&), Integer )
 import           Ledger                    ( TokenName, CurrencySymbol, PubKeyHash, ValidatorHash )
 import           Plutus.Contract           ( Endpoint, type (.\/) )
+import qualified Plutus.V2.Ledger.Api      as LedgerApiV2
 
-newtype MarketParams = MarketParams
+data MarketParams = MarketParams
     { feeAddr  :: PubKeyHash
+    , feePrct  :: !Plutus.Integer
     } deriving (Generic, ToJSON, FromJSON)
 
 PlutusTx.makeIsDataIndexed ''MarketParams [('MarketParams, 0)]
@@ -36,24 +38,26 @@ PlutusTx.makeLift ''MarketParams
 
 
 data NFTSale = NFTSale
-    { nSeller    :: !PubKeyHash
+    { nRenter    :: !PubKeyHash
     , nPrice     :: !Plutus.Integer
     , nCurrency  :: !CurrencySymbol
     , nToken     :: !TokenName
-    , nSchedule  :: POSIXTime
-    , nRoyAddr   :: !PubKeyHash
-    , nRoyPrct   :: !Plutus.Integer
+    , nSchedule  :: LedgerApiV2.POSIXTimeRange
+    , nDeadline  :: LedgerApiV2.POSIXTime
+ --   , nRoyAddr   :: !PubKeyHash
+ --   , nRoyPrct   :: !Plutus.Integer
     } deriving (Generic, ToJSON, FromJSON)
 
 instance Eq NFTSale where
     {-# INLINABLE (==) #-}
-    a == b = (nSeller    a == nSeller    b) &&
+    a == b = (nRenter    a == nRenter    b) &&
              (nPrice     a == nPrice     b) &&
              (nCurrency  a == nCurrency  b) &&
              (nToken     a == nToken     b) &&
              (nSchedule  a == nSchedule  b) &&
-             (nRoyAddr   a == nRoyAddr   b) &&
-             (nRoyPrct   a == nRoyPrct   b)
+--             (nRoyAddr   a == nRoyAddr   b) &&
+--             (nRoyPrct   a == nRoyPrct   b)
+             (nDeadline  a == nDeadline  b)
 
 PlutusTx.makeIsDataIndexed ''NFTSale [('NFTSale, 0)]
 PlutusTx.makeLift ''NFTSale
@@ -66,18 +70,16 @@ PlutusTx.makeIsDataIndexed ''SaleAction [('Buy, 0), ('Close, 1)]
 PlutusTx.makeLift ''SaleAction
 
 
--- We define two different params for the two endpoints start and buy with the minimal info needed.
--- Therefore the user doesn't have to provide more that what's needed to execute the said action.
-{- For StartParams we ommit the seller
-    because we automatically input the address of the wallet running the startSale enpoint
+-- Definimos 2 parametros diferentes para los 2 endpoints 'start' y 'buy' con la informacion minima requerida.
+{- Para StartParams omitimos al arrendador debido a que nosotros automaticamente ingresamos la direccion de la billetera al correr el endpoint startSale
     
-   For BuyParams we ommit seller and price
-    because we can read that in datum which can be obtained with just cs and tn of the sold token -}
+   Para BuyParams omitimos el arrendador y el precio debido que nosotros podemos leer eso en el datum que puede ser obtenido cotejando los valores 
+   del datum 'cs', 'tn' y 'schedule' del token vendido -}
 
 data BuyParams = BuyParams
     { bCs :: CurrencySymbol
     , bTn :: TokenName
-    , bSchedule :: POSIXTime
+    , bSchedule :: LedgerApiV2.POSIXTimeRange
     } deriving (Pr.Eq, Pr.Ord, Show, Generic, ToJSON, FromJSON, ToSchema)
 
 
@@ -85,7 +87,8 @@ data StartParams = StartParams
     { sPrice :: Integer
     , sCs    :: CurrencySymbol
     , sTn    :: TokenName
-    , sSchedule :: POSIXTime
+    , sSchedule :: LedgerApiV2.POSIXTimeRange
+    , sDeadline :: LedgerApiV2.POSIXTime
     } deriving (Pr.Eq, Pr.Ord, Show, Generic, ToJSON, FromJSON, ToSchema)
 
 
