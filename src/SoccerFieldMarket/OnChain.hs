@@ -20,78 +20,56 @@ import qualified Data.ByteString.Lazy  as LB
 import qualified Data.ByteString.Short as SBS
 import           Codec.Serialise       ( serialise )
 
-import           Cardano.Api.Shelley (PlutusScript (..), PlutusScriptV1)
-import qualified PlutusTx
-import PlutusTx.Prelude as Plutus
-    ( Bool(..), Eq((==)), (.), (&&), Integer, Maybe(..), (>=), fromInteger, traceIfFalse)
-import Ledger
-    ( PubKeyHash(..),
-      --ValidatorHash,
-      --Address(Address),
-      --validatorHash,
-      DatumHash,
-      Datum(..),
-      txOutDatum,
-      txSignedBy,
-      ScriptContext(scriptContextTxInfo),
-      --ownHash,
-      TxInfo,
-      --Validator,
-      --TxOut,
-      txInfoSignatories,
-      unValidatorScript,
-      --txInInfoResolved,
-      --txInfoInputs,
-      valuePaidTo,
-      --txOutAddress,
-      txInfoValidRange)
-import qualified Ledger.Typed.Scripts         as Scripts
-import qualified Plutus.V1.Ledger.Scripts     as Plutus
-import           Ledger.Value                 as Value ( valueOf )
-import qualified Ledger.Ada         as Ada (fromValue, Ada (getLovelace))
---import           Plutus.V1.Ledger.Credential (Credential(ScriptCredential))
-import qualified Plutus.V1.Ledger.Interval    as LedgerIntervalV1
---import qualified Plutus.V2.Ledger.Contexts    as Contexts
-import qualified Plutus.V1.Ledger.Tx          as LedgerV1
+--import qualified Prelude                                as P
+import qualified Plutus.Script.Utils.V2.Typed.Scripts.Validators as Scripts
 import qualified Plutus.Script.Utils.V2.Scripts as V2UtilsScripts
-
+import qualified Plutus.V2.Ledger.Contexts                       as Contexts
+import qualified Plutus.V2.Ledger.Api                            as LedgerApiV2
+import qualified Plutus.V1.Ledger.Interval                            as LedgerIntervalV1
+--import qualified Plutus.V1.Ledger.Tx                             as LedgerTxV1
+import qualified Plutus.V2.Ledger.Tx                             as LedgerTxV2
+import qualified Ledger.Value                                    as Value
+import qualified Ledger                                          
+import qualified PlutusTx
+import PlutusTx.Prelude
+import qualified Ledger.Ada                                      as Ada
+import           Cardano.Api.Shelley (PlutusScript (..), PlutusScriptV1)
 
 import SoccerFieldMarket.Types    (NFTSale(..), SaleAction(..), MarketParams(..))
 
-
 {-# INLINABLE nftDatum #-}
-nftDatum :: LedgerV1.TxOut -> (DatumHash -> Maybe Datum) -> Maybe NFTSale
+nftDatum :: LedgerApiV2.TxOut -> (Ledger.DatumHash -> Maybe Ledger.Datum) -> Maybe NFTSale
 nftDatum o f = do
-    dh <- txOutDatum o
-    Datum d <- f dh
+    LedgerTxV2.OutputDatumHash dh <- Just (LedgerTxV2.txOutDatum o)
+    Ledger.Datum d <- f (dh)
     PlutusTx.fromBuiltinData d
 
 {-# INLINABLE mkBuyValidator #-}
-mkBuyValidator :: MarketParams -> NFTSale -> SaleAction -> ScriptContext -> Bool
+mkBuyValidator :: MarketParams -> NFTSale -> SaleAction -> LedgerApiV2.ScriptContext -> Bool
 mkBuyValidator _ nfts r ctx = case r of
     Buy     -> traceIfFalse "Deadline reached" deadlinepassed &&
-               traceIfFalse "The token amount buyed is incorrect" (valueOf (valuePaidTo txinfo buyer) (nCurrency nfts) (nToken nfts) == 1) &&
+               traceIfFalse "The token amount buyed is incorrect" (Value.valueOf (Contexts.valuePaidTo txinfo buyer) (nCurrency nfts) (nToken nfts) == 1) &&
                traceIfFalse "The ADA amount payed to seller is incorrect" (checkSellerOut (nRenter nfts) (nPrice nfts))
                
-    Close   -> traceIfFalse "The Tx is not signed by the seller" (txSignedBy (scriptContextTxInfo ctx) (nRenter nfts))
+    Close   -> traceIfFalse "The Tx is not signed by the seller" (Contexts.txSignedBy (Contexts.scriptContextTxInfo ctx) (nRenter nfts))
 
   where
-    txinfo :: TxInfo
-    txinfo = scriptContextTxInfo ctx
+    txinfo :: Contexts.TxInfo
+    txinfo = Contexts.scriptContextTxInfo ctx
 
-    buyer :: PubKeyHash
-    buyer = case txInfoSignatories txinfo of
+    buyer :: Ledger.PubKeyHash
+    buyer = case Contexts.txInfoSignatories txinfo of
             [pubKeyHash] -> pubKeyHash
 
     --checkSingleBuy :: Bool
     --checkSingleBuy = let is = [ i | i <- map txInInfoResolved (txInfoInputs txinfo), txOutAddress i == Address (ScriptCredential $ ownHash ctx) Nothing ] in
     --    length is == 1
 
-    checkSellerOut :: PubKeyHash -> Integer -> Bool
-    checkSellerOut seller price = fromInteger (Ada.getLovelace (Ada.fromValue (valuePaidTo txinfo seller))) >= fromInteger price
+    checkSellerOut :: Ledger.PubKeyHash -> Integer -> Bool
+    checkSellerOut seller price = fromInteger (Ada.getLovelace (Ada.fromValue (Contexts.valuePaidTo txinfo seller))) >= fromInteger price
 
     deadlinepassed :: Bool 
-    deadlinepassed = LedgerIntervalV1.contains (LedgerIntervalV1.to (nDeadline nfts)) (txInfoValidRange txinfo)
+    deadlinepassed = LedgerIntervalV1.contains (LedgerIntervalV1.to (nDeadline nfts)) (Contexts.txInfoValidRange txinfo)
 
 data Sale
 instance Scripts.ValidatorTypes Sale where
@@ -112,7 +90,7 @@ buyValidator = Scripts.validatorScript . typedBuyValidator
 buyValidatorHash :: MarketParams -> V2UtilsScripts.ValidatorHash
 buyValidatorHash = V2UtilsScripts.validatorHash . buyValidator
 
-buyScript :: MarketParams -> Plutus.Script
+buyScript :: MarketParams -> LedgerApiV2.Script
 buyScript = Ledger.unValidatorScript . buyValidator
 
 buyScriptAsShortBs :: MarketParams -> SBS.ShortByteString
